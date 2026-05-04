@@ -1,10 +1,10 @@
 // src/services/aiService.js
-// Claude Vision API wrapper for crop disease diagnosis
+// Gemini Vision API wrapper for crop disease diagnosis
 "use strict";
 
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenAI } = require("@google/genai");
 
-const MODEL = "claude-opus-4-5";
+const MODEL = "gemini-2.5-flash";
 
 const DIAGNOSIS_SYSTEM_PROMPT = `You are an expert agricultural pathologist specializing in crop disease diagnosis.
 Analyze the provided leaf image and return ONLY a valid JSON object — no markdown fences, no extra text.
@@ -30,38 +30,30 @@ Rules:
 - "description" is a brief explanation of your findings.`;
 
 /**
- * Build the Claude messages payload for a base64-encoded image.
+ * Build Gemini parts payload for a base64-encoded image.
  *
  * @param {string} base64Image  - Base64-encoded image data (without the data: prefix).
  * @param {string} mediaType    - MIME type, e.g. "image/jpeg" or "image/png".
  * @param {string} [cropType]   - Optional crop type hint, e.g. "maize".
- * @returns {Array} messages array for the Anthropic API.
+ * @returns {Array} parts array for Gemini generateContent.
  */
 function buildMessages(base64Image, mediaType, cropType) {
   const cropHint = cropType ? ` The crop type is: ${cropType}.` : "";
   return [
     {
-      role: "user",
-      content: [
-        {
-          type: "image",
-          source: {
-            type: "base64",
-            media_type: mediaType,
-            data: base64Image,
-          },
-        },
-        {
-          type: "text",
-          text: `Analyze this leaf image for diseases and return a JSON diagnosis.${cropHint}`,
-        },
-      ],
+      inlineData: {
+        mimeType: mediaType,
+        data: base64Image,
+      },
+    },
+    {
+      text: `Analyze this leaf image for diseases and return a JSON diagnosis.${cropHint}`,
     },
   ];
 }
 
 /**
- * Parse the raw text response from Claude into a validated diagnosis object.
+ * Parse the raw text response from Gemini into a validated diagnosis object.
  *
  * @param {string} rawText - The text content from Claude's response.
  * @returns {Object} Parsed and validated diagnosis object.
@@ -72,7 +64,7 @@ function parseResponse(rawText) {
   try {
     parsed = JSON.parse(rawText.trim());
   } catch {
-    throw new Error(`Claude returned non-JSON response: ${rawText.slice(0, 200)}`);
+    throw new Error(`Gemini returned non-JSON response: ${rawText.slice(0, 200)}`);
   }
 
   const requiredFields = [
@@ -86,7 +78,7 @@ function parseResponse(rawText) {
   ];
   const missing = requiredFields.filter((f) => !(f in parsed));
   if (missing.length > 0) {
-    throw new Error(`Claude response missing required fields: ${missing.join(", ")}`);
+    throw new Error(`Gemini response missing required fields: ${missing.join(", ")}`);
   }
 
   const validSeverities = ["none", "low", "medium", "high"];
@@ -110,7 +102,7 @@ function parseResponse(rawText) {
 }
 
 /**
- * Analyze a crop leaf image using the Claude Vision API.
+ * Analyze a crop leaf image using the Gemini Vision API.
  *
  * @param {string} base64Image  - Base64-encoded image data (without the data: prefix).
  * @param {string} [mediaType]  - MIME type. Defaults to "image/jpeg".
@@ -131,23 +123,26 @@ async function analyzeImage(base64Image, mediaType = "image/jpeg", cropType = nu
     throw new Error("base64Image is required");
   }
 
-  const apiKey = process.env.CLAUDE_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("CLAUDE_API_KEY environment variable is not set");
+    throw new Error("GEMINI_API_KEY environment variable is not set");
   }
 
-  const client = new Anthropic({ apiKey });
+  const client = new GoogleGenAI({ apiKey });
 
-  const response = await client.messages.create({
+  const response = await client.models.generateContent({
     model: MODEL,
-    max_tokens: 1024,
-    system: DIAGNOSIS_SYSTEM_PROMPT,
-    messages: buildMessages(base64Image, mediaType, cropType),
+    contents: buildMessages(base64Image, mediaType, cropType),
+    config: {
+      systemInstruction: DIAGNOSIS_SYSTEM_PROMPT,
+      responseMimeType: "application/json",
+      maxOutputTokens: 1024,
+    },
   });
 
-  const rawText = response.content?.[0]?.text;
+  const rawText = response.text;
   if (!rawText) {
-    throw new Error("Empty response from Claude API");
+    throw new Error("Empty response from Gemini API");
   }
 
   return parseResponse(rawText);
