@@ -58,10 +58,12 @@ function ImgPlaceholder({
   className,
   label = "Image placeholder",
   aspectRatio = "aspect-video",
+  src,
 }: {
   className?: string;
   label?: string;
   aspectRatio?: string;
+  src?: string;
 }) {
   return (
     <div
@@ -71,15 +73,25 @@ function ImgPlaceholder({
         className
       )}
     >
+      {src ? (
+        <img
+          src={src}
+          alt={label}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+      ) : null}
       {/* grid pattern */}
-      <div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage:
-            "linear-gradient(#41493e 1px, transparent 1px), linear-gradient(90deg, #41493e 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-      />
+      {!src ? (
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(#41493e 1px, transparent 1px), linear-gradient(90deg, #41493e 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+      ) : null}
       {/* corner brackets */}
       {[
         "top-3 left-3 border-t-2 border-l-2",
@@ -92,14 +104,16 @@ function ImgPlaceholder({
           className={cn("absolute w-5 h-5 border-[#91d78a]", cls)}
         />
       ))}
-      <div className="relative z-10 flex flex-col items-center gap-2 text-center px-4">
-        <div className="w-10 h-10 rounded-full bg-[#1b5e20]/30 border border-[#91d78a]/30 flex items-center justify-center">
-          <Leaf className="w-5 h-5 text-[#91d78a]/60" />
+      {!src ? (
+        <div className="relative z-10 flex flex-col items-center gap-2 text-center px-4">
+          <div className="w-10 h-10 rounded-full bg-[#1b5e20]/30 border border-[#91d78a]/30 flex items-center justify-center">
+            <Leaf className="w-5 h-5 text-[#91d78a]/60" />
+          </div>
+          <p className="text-[11px] font-medium text-[#8a9386] uppercase tracking-widest">
+            {label}
+          </p>
         </div>
-        <p className="text-[11px] font-medium text-[#8a9386] uppercase tracking-widest">
-          {label}
-        </p>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -306,6 +320,7 @@ function Hero() {
               label="Hero dashboard screenshot"
               aspectRatio="aspect-[4/3]"
               className="w-full"
+              src="/uploads/heroImage.png"
             />
             {/* Floating stat card */}
             <div className="absolute -bottom-4 -left-4 bg-[#201f1f] border border-[#41493e] rounded-[1rem] px-4 py-3 shadow-xl">
@@ -497,25 +512,25 @@ function HowItWorks() {
       num: "01",
       title: "Install the sensor node",
       desc: "Flash the open-source firmware onto your ESP32, wire up the DHT11 and moisture sensors, and connect to Wi-Fi. Takes 20 minutes.",
-      image: "ESP32 sensor hardware setup",
+      image: "/uploads/farmerscanland.png",
     },
     {
       num: "02",
       title: "Live data flows to your dashboard",
       desc: "Every 30 minutes, sensor readings push to Firebase and appear instantly on your Farm Dashboard — soil moisture, temperature, humidity.",
-      image: "Dashboard live sensor data",
+      image: "/uploads/AIAnalysisResultsScreen.png",
     },
     {
       num: "03",
       title: "Photograph leaves for AI diagnosis",
       desc: "Open the Scan screen, take a photo of any leaf, and Claude Vision AI returns disease name, confidence score, and treatment steps in seconds.",
-      image: "AI disease diagnosis screen",
+      image: "/uploads/TreatmentRecommendationScreen.png",
     },
     {
       num: "04",
       title: "Act on intelligent recommendations",
       desc: "The engine combines your sensor data and weather forecasts into a single, clear action: irrigate now, hold, or alert for an agronomist.",
-      image: "Recommendation action card",
+      image: "/uploads/TreatmentRecommendationScreen.png",
     },
   ];
 
@@ -576,8 +591,9 @@ function HowItWorks() {
               {/* Image */}
               <div className={cn(i % 2 === 1 && "lg:col-start-1 lg:row-start-1")}>
                 <ImgPlaceholder
-                  label={step.image}
+                  label={step.title}
                   aspectRatio="aspect-[16/9]"
+                  src={step.image}
                 />
               </div>
             </div>
@@ -751,6 +767,7 @@ function AppPreview() {
                 label="Mobile dashboard"
                 aspectRatio="aspect-[9/16]"
                 className="w-full"
+                src="/uploads/mobi1.jpg"
               />
             </div>
             <div className="w-40">
@@ -758,6 +775,7 @@ function AppPreview() {
                 label="Mobile scan screen"
                 aspectRatio="aspect-[9/16]"
                 className="w-full"
+                src="/uploads/mobil2.jpg"
               />
             </div>
             {/* Background glow */}
