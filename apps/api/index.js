@@ -1,5 +1,6 @@
 // index.js
 // Server entry point
+require("dotenv").config();
 const app = require("./app");
 const mqttService = require("./src/services/mqttService");
 
