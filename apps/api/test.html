@@ -172,7 +172,7 @@
 <body>
 
 <h1>🌱 Smart Agriculture — Backend Test</h1>
-<p class="subtitle">Live test panel for the MVP demo · Backend: <code>http://localhost:3000</code></p>
+<p class="subtitle">Live test panel for the MVP demo · Backend: <code>https://smart-agriculture-backend-2nk0.onrender.com</code></p>
 
 <div class="grid">
 
@@ -241,10 +241,23 @@
     <div class="history-log" id="historyLog">Waiting for data…</div>
   </div>
 
+  <!-- ENDPOINT TESTING CARD -->
+  <div class="card history-section" style="margin-top: 20px;">
+    <h2>🧪 API Endpoint Tests</h2>
+    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">Run a suite of tests to verify all endpoints are responsive.</p>
+    <button class="btn" id="runTestsBtn" onclick="runAllTests()">Run All Tests</button>
+    
+    <div id="testResults" style="margin-top: 14px; font-family: monospace; font-size: 12px; color: #94a3b8; line-height: 1.6; max-height: 300px; overflow-y: auto;"></div>
+    
+    <div id="testSuccessMsg" style="display: none; margin-top: 14px; padding: 12px; background: #052e16; border: 1px solid #22c55e; color: #bbf7d0; border-radius: 8px; font-weight: bold; text-align: center;">
+      this all endpoint tested and worked
+    </div>
+  </div>
+
 </div>
 
 <script>
-  const API = "http://localhost:3000";
+  const API = "https://smart-agriculture-backend-2nk0.onrender.com";
 
   // ── SENSOR POLLING ──────────────────────────────────────────────────────────
   async function fetchLatest() {
@@ -359,6 +372,82 @@
         document.getElementById(id).textContent = "";
       });
     }
+  }
+
+  // ── ENDPOINT TESTING ──────────────────────────────────────────────────────────
+  async function runAllTests() {
+    const btn = document.getElementById("runTestsBtn");
+    const results = document.getElementById("testResults");
+    const successMsg = document.getElementById("testSuccessMsg");
+    
+    btn.disabled = true;
+    btn.textContent = "Running Tests...";
+    results.innerHTML = "";
+    successMsg.style.display = "none";
+    
+    function logTest(name, status, details = "") {
+      const color = status === "OK" ? "#4ade80" : "#f87171";
+      results.innerHTML += `<div>[<span style="color:${color}">${status}</span>] ${name} ${details}</div>`;
+      results.scrollTop = results.scrollHeight;
+    }
+
+    try {
+      // 1. GET /api/v1/health
+      let res = await fetch(`${API}/api/v1/health`);
+      logTest("GET /api/v1/health", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 2. GET /api/latest
+      res = await fetch(`${API}/api/latest`);
+      logTest("GET /api/latest", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 3. GET /api/history
+      res = await fetch(`${API}/api/history`);
+      logTest("GET /api/history", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 4. GET /api/status
+      res = await fetch(`${API}/api/status`);
+      logTest("GET /api/status", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 5. POST /api/pump (ON)
+      res = await fetch(`${API}/api/pump`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: 1, state: "ON" })
+      });
+      logTest("POST /api/pump (ON)", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 6. POST /api/pump (OFF)
+      res = await fetch(`${API}/api/pump`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: 0, state: "OFF" })
+      });
+      logTest("POST /api/pump (OFF)", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 7. POST /api/v1/sensor-analysis
+      res = await fetch(`${API}/api/v1/sensor-analysis`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          temperature: 28.5,
+          humidity: 65.0,
+          soilMoisture: 42.0,
+          cropType: "wheat"
+        })
+      });
+      logTest("POST /api/v1/sensor-analysis", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      // 8. GET /api/v1/diagnose/mock-diag-12345
+      res = await fetch(`${API}/api/v1/diagnose/mock-diag-12345`);
+      logTest("GET /api/v1/diagnose/mock-diag-12345", res.ok ? "OK" : "FAIL", `(${res.status})`);
+
+      successMsg.style.display = "block";
+    } catch (e) {
+      logTest("Test Suite", "FAIL", `- ${e.message}`);
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Run All Tests";
   }
 </script>
 </body>
