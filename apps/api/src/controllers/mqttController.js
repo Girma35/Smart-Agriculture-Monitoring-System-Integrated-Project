@@ -8,6 +8,9 @@ const mqttService = require("../services/mqttService");
  * GET /api/latest
  * Returns the most recent sensor reading.
  * If no reading has been received from MQTT yet, it returns a default mockup reading to prevent app crashes.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {Object} JSON containing the latest sensor reading data
  */
 function getLatest(req, res) {
   let latest = mqttService.getLatestReading();
@@ -35,6 +38,9 @@ function getLatest(req, res) {
 /**
  * GET /api/history
  * Returns the rolling array of the last 50 readings.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {Object} JSON containing the history of sensor readings
  */
 function getHistory(req, res) {
   const history = mqttService.getHistory();
@@ -48,6 +54,9 @@ function getHistory(req, res) {
 /**
  * POST /api/pump
  * Sends a pump control command (ON/OFF) via MQTT.
+ * @param {Object} req - The Express request object containing the state
+ * @param {Object} res - The Express response object
+ * @returns {Object} JSON confirming the command was sent
  */
 function controlPump(req, res) {
   const { state } = req.body;
@@ -77,6 +86,9 @@ function controlPump(req, res) {
 /**
  * GET /api/status
  * Returns health status, MQTT connection, and uptime.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {Object} JSON containing the system status
  */
 function getStatus(req, res) {
   const status = mqttService.getStatus();

@@ -25,6 +25,10 @@ let serverStartTime = Math.floor(Date.now() / 1000);
 
 /**
  * Rules engine to calculate agricultural recommendation strings
+ * @param {number} soilMoisture - Soil moisture percentage
+ * @param {number} temperature - Temperature in Celsius
+ * @param {number} humidity - Humidity percentage
+ * @returns {string} A string containing farming recommendations
  */
 function generateRecommendation(soilMoisture, temperature, humidity) {
   const recommendations = [];
@@ -55,6 +59,7 @@ function generateRecommendation(soilMoisture, temperature, humidity) {
 
 /**
  * Initialize MQTT Client connection and subscriptions
+ * @returns {void}
  */
 function initialize() {
   console.log(`🔌 Connecting to HiveMQ MQTT Broker at ${BROKER_URL}...`);
@@ -138,6 +143,7 @@ function initialize() {
 
 /**
  * Get the latest sensor reading
+ * @returns {Object|null} The most recent sensor reading from the history buffer
  */
 function getLatestReading() {
   if (history.length === 0) {
@@ -148,6 +154,7 @@ function getLatestReading() {
 
 /**
  * Get all readings in the rolling history buffer
+ * @returns {Array} Array of past sensor readings
  */
 function getHistory() {
   return history;
@@ -155,6 +162,8 @@ function getHistory() {
 
 /**
  * Publish pump control state (ON or OFF)
+ * @param {string} state - The desired state ("ON" or "OFF")
+ * @returns {void}
  */
 function setPumpState(state) {
   if (!client || !isConnected) {
@@ -169,6 +178,7 @@ function setPumpState(state) {
 
 /**
  * Get MQTT status, server uptime, etc.
+ * @returns {Object} Server and MQTT status information
  */
 function getStatus() {
   const currentUptime = Math.floor(Date.now() / 1000) - serverStartTime;

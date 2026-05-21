@@ -9,6 +9,9 @@ const {
 /**
  * POST /api/v1/diagnose
  * Submit a leaf image for AI disease diagnosis.
+ * @param {Object} req - The Express request object containing the image file
+ * @param {Object} res - The Express response object
+ * @returns {Promise<Object>} JSON containing the diagnosis results
  */
 async function submitDiagnosis(req, res) {
   try {
@@ -43,6 +46,9 @@ async function submitDiagnosis(req, res) {
 /**
  * GET /api/v1/diagnose/history
  * Get the authenticated farmer's diagnosis history.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {Promise<Object>} JSON containing the diagnosis history
  */
 async function getHistory(req, res) {
   try {
@@ -61,6 +67,9 @@ async function getHistory(req, res) {
 /**
  * GET /api/v1/diagnose/:id
  * Get a single diagnosis result.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {Promise<Object>} JSON containing the requested diagnosis
  */
 async function getSingleDiagnosis(req, res) {
   try {
@@ -88,6 +97,9 @@ async function getSingleDiagnosis(req, res) {
 /**
  * DELETE /api/v1/diagnose/:id
  * Delete a diagnosis record.
+ * @param {Object} req - The Express request object
+ * @param {Object} res - The Express response object
+ * @returns {Promise<Object>} JSON confirming successful deletion
  */
 async function removeDiagnosis(req, res) {
   try {

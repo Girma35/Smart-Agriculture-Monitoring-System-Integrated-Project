@@ -4,6 +4,12 @@ const { diagnoseCropDisease } = require("./ai.service");
 
 /**
  * Creates a new diagnosis using Roboflow.
+ * @param {string} userId - The ID of the user requesting the diagnosis
+ * @param {Buffer} imageBuffer - The image data
+ * @param {string} mimeType - The MIME type of the image
+ * @param {string} originalName - The original filename
+ * @param {string} cropType - The type of crop
+ * @returns {Promise<Object>} The newly created diagnosis object
  */
 async function createDiagnosis(userId, imageBuffer, mimeType, originalName, cropType) {
   // 1. Mock image URL
@@ -27,6 +33,8 @@ async function createDiagnosis(userId, imageBuffer, mimeType, originalName, crop
 
 /**
  * Retrieves mock history
+ * @param {string} userId - The ID of the user
+ * @returns {Promise<Array>} Array of past diagnosis records
  */
 async function getDiagnosisHistory(userId) {
   return [
@@ -48,6 +56,9 @@ async function getDiagnosisHistory(userId) {
 
 /**
  * Retrieves a single mock diagnosis
+ * @param {string} userId - The ID of the user
+ * @param {string} diagnosisId - The ID of the diagnosis
+ * @returns {Promise<Object>} The requested diagnosis record
  */
 async function getDiagnosisById(userId, diagnosisId) {
   return {
@@ -67,6 +78,9 @@ async function getDiagnosisById(userId, diagnosisId) {
 
 /**
  * Mocks deleting a diagnosis
+ * @param {string} userId - The ID of the user
+ * @param {string} diagnosisId - The ID of the diagnosis
+ * @returns {Promise<boolean>} True if successful
  */
 async function deleteDiagnosis(userId, diagnosisId) {
   return true;
