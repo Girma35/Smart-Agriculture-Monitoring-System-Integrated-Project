@@ -1,0 +1,57 @@
+==================================================
+SMART AGRICULTURE MONITORING SYSTEM - BACKEND DOCS
+==================================================
+
+This document contains a comprehensive overview of all backend functions, their purposes, parameters, and return values.
+
+## CONTROLLERS
+
+### aiController.js
+- `diagnose(req, res)`: Handles POST /api/v1/diagnose. Accepts a multipart/form-data upload with a leaf image and optional cropType. Returns a JSON diagnosis envelope with disease details, confidence, and remedies.
+
+### diagnose.controller.js
+- `submitDiagnosis(req, res)`: Handles POST /api/v1/diagnose. Submits a leaf image for AI disease diagnosis and saves the mock record.
+- `getHistory(req, res)`: Handles GET /api/v1/diagnose/history. Retrieves the authenticated farmer's diagnosis history.
+- `getSingleDiagnosis(req, res)`: Handles GET /api/v1/diagnose/:id. Retrieves a single diagnosis result by ID.
+- `removeDiagnosis(req, res)`: Handles DELETE /api/v1/diagnose/:id. Deletes a specific diagnosis record.
+
+### sensor-analysis.controller.js
+- `analyzeSensors(req, res)`: Handles POST /api/v1/sensor-analysis. Accepts a JSON body with IoT sensor readings (temperature, humidity, soilMoisture, cropType) and returns AI-powered farming recommendations.
+
+### mqttController.js
+- `getLatest(req, res)`: Handles GET /api/latest. Returns the most recent sensor reading from MQTT.
+- `getHistory(req, res)`: Handles GET /api/history. Returns the rolling array of the last 50 sensor readings.
+- `controlPump(req, res)`: Handles POST /api/pump. Sends a pump control command (ON/OFF) via MQTT.
+- `getStatus(req, res)`: Handles GET /api/status. Returns server health status, MQTT connection status, and uptime.
+
+
+## SERVICES
+
+### aiService.js
+- `analyzeImage(base64Image, mediaType, cropType)`: Analyzes a base64-encoded crop leaf image using the Roboflow Inference API. Returns a structured diagnosis JSON.
+
+### ai.service.js
+- `diagnoseCropDisease(imageBuffer, mimeType, cropType)`: Wrapper for Roboflow API to diagnose crop diseases from raw image buffer data.
+
+### diagnose.service.js
+- `createDiagnosis(userId, imageBuffer, mimeType, originalName, cropType)`: Creates a new mock diagnosis record after running AI diagnosis.
+- `getDiagnosisHistory(userId)`: Retrieves a mocked array of past diagnoses for the user.
+- `getDiagnosisById(userId, diagnosisId)`: Retrieves a single mocked diagnosis record by its ID.
+- `deleteDiagnosis(userId, diagnosisId)`: Mocks the deletion of a diagnosis record.
+
+### sensor-analysis.service.js
+- `buildSensorAnalysisPrompt(reading)`: Builds a prompt string for LLM analysis based on sensor readings and ideal crop ranges.
+- `parseSensorAnalysisResponse(rawText)`: Parses and validates the JSON response from an LLM.
+- `analyzeSensorData(reading)`: Analyzes farm sensor readings using localized rules and returns recommendations, alerts, and status without external LLM calls.
+
+### mqttService.js
+- `generateRecommendation(soilMoisture, temperature, humidity)`: Rules engine to calculate agricultural recommendation strings based on sensor data.
+- `initialize()`: Initializes the MQTT client connection and subscribes to data topics.
+- `getLatestReading()`: Retrieves the latest sensor reading from the rolling history.
+- `getHistory()`: Retrieves all readings in the rolling history buffer.
+- `setPumpState(state)`: Publishes a pump control state (ON or OFF) to the control topic.
+- `getStatus()`: Gets the MQTT connection status, server uptime, and timestamp.
+
+### roboflowService.js
+- `predictImage(imageBuffer, mimeType)`: Sends raw image data to the Roboflow Object Detection API and returns the structured diagnosis.
+- `parseRoboflowResult(result)`: Parses and validates the predictions array from the Roboflow JSON response, matching against a local disease database.
